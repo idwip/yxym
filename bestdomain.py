@@ -62,6 +62,9 @@ if __name__ == "__main__":
     subdomain_ip_mapping = {
         'bestcf': 'https://ipdb.030101.xyz/api/bestcf.txt',  # #域名一，bestcf.域名.com
         'api': 'https://raw.githubusercontent.com/idwip/yxym/refs/heads/main/ip.txt', #域名二，api.域名.com
+        'cb': 'https://stock.hostmonit.com/CloudFlareYes',  # 新增纯文本源
+        'cm': 'https://cf.090227.xyz/api/best.txt',      # 新增纯文本源
+        'cn': 'https://api.uouin.com/cloudflare.html',      # 新增HTML源
         # 添加更多子域名和对应的IP列表URL
     }
     
