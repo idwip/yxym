@@ -89,9 +89,9 @@ if __name__ == "__main__":
     subdomain_ip_mapping = {
         'bestcf': 'https://ipdb.030101.xyz/api/bestcf.txt',
         'api': 'https://raw.githubusercontent.com/idwip/yxym/refs/heads/main/ip.txt',
-        'stock': 'https://stock.hostmonit.com/CloudFlareYes',
-        'cf090227': 'https://cf.090227.xyz/api/best.txt',
-        'uouin': 'https://api.uouin.com/cloudflare.html',
+        'cb': 'https://stock.hostmonit.com/CloudFlareYes',
+        'cm': 'https://cf.090227.xyz/api/best.txt',
+        'cn': 'https://api.uouin.com/cloudflare.html',
     }
 
     try:
