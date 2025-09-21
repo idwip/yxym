@@ -12,50 +12,56 @@ urls = [
     'https://stock.hostmonit.com/CloudFlareYes'
 ]
 
-# 正则表达式用于匹配IP地址
-ip_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+# 模拟浏览器请求，防止被拦截
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+}
 
-# 检查ip.txt文件是否存在,如果存在则删除它
-if os.path.exists('ip.txt'):
-    os.remove('ip.txt')
+# 更严格的IP正则表达式
+ip_pattern = r'(?:\d{1,3}\.){3}\d{1,3}'
 
-# 创建一个文件来存储IP地址
-with open('ip.txt', 'w') as file:
-    for url in urls:
-        try:
-            # 发送HTTP请求获取网页内容
-            response = requests.get(url, timeout=10)
-            response.encoding = 'utf-8'
+# 存储所有IP，避免重复
+all_ips = set()
 
-            # 使用BeautifulSoup解析HTML
-            soup = BeautifulSoup(response.text, 'html.parser')
+for url in urls:
+    try:
+        # 请求网页内容
+        response = requests.get(url, headers=headers, timeout=10)
+        response.encoding = 'utf-8'
+        print(f"正在抓取 {url}, 状态码: {response.status_code}")
 
-            # 根据网站的不同结构找到包含IP地址的元素
-            if url in ['https://ip.164746.xyz/ipTop10.html', 'https://cf.090227.xyz']:
-                elements = soup.find_all('tr')
-            elif url == 'https://api.uouin.com/cloudflare.html':
-                elements = soup.find_all('div', class_='ip')
-            elif url == 'https://www.wetest.vip/page/cloudflare/address_v4.html':
-                elements = soup.find_all('p')
-            elif url == 'https://stock.hostmonit.com/CloudFlareYes':
-                # 这是一个纯文本页面，不用解析 HTML
-                ip_matches = re.findall(ip_pattern, response.text)
-                for ip in ip_matches:
-                    file.write(ip + '\n')
-                continue
-            else:
-                elements = soup.find_all('li')
+        # 特殊情况：纯文本格式
+        if url == 'https://stock.hostmonit.com/CloudFlareYes':
+            ip_matches = re.findall(ip_pattern, response.text)
+            all_ips.update(ip_matches)
+            continue
 
-            # 遍历所有元素,查找IP地址
-            for element in elements:
-                element_text = element.get_text()
-                ip_matches = re.findall(ip_pattern, element_text)
+        # 解析HTML
+        soup = BeautifulSoup(response.text, 'html.parser')
 
-                # 如果找到IP地址,则写入文件
-                for ip in ip_matches:
-                    file.write(ip + '\n')
+        # 根据不同网站结构选择标签
+        if url in ['https://ip.164746.xyz/ipTop10.html', 'https://cf.090227.xyz']:
+            elements = soup.find_all('tr')
+        elif url == 'https://api.uouin.com/cloudflare.html':
+            elements = soup.find_all('div', class_='ip')
+        elif url == 'https://www.wetest.vip/page/cloudflare/address_v4.html':
+            elements = soup.find_all('p')
+        else:
+            elements = soup.find_all('li')
 
-        except Exception as e:
-            print(f"处理 {url} 时出错：{e}")
+        # 从标签中提取IP
+        for element in elements:
+            ip_matches = re.findall(ip_pattern, element.get_text())
+            all_ips.update(ip_matches)
 
-print('IP地址已保存到 ip.txt 文件中。')
+    except Exception as e:
+        print(f"处理 {url} 时出错：{e}")
+
+# 保存到 ip.txt
+if all_ips:
+    with open('ip.txt', 'w') as file:
+        for ip in sorted(all_ips):
+            file.write(ip + '\n')
+    print(f"共抓取到 {len(all_ips)} 个 IP，已保存到 ip.txt")
+else:
+    print("未抓取到任何 IP，请检查网络或网页结构。")
